@@ -1,0 +1,3 @@
+- install Node.js
+- in directory run npm install
+- then run npm run dev
