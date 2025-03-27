@@ -1,7 +1,7 @@
 import { redirectToAuthCodeFlow, getAccessToken } from "./authCodeWithPkce.js";
 
 /** authorization */
-const clientId = "4e99e3e9fcd5452f8d15b91dfb62b3cb";
+const clientId = "96f894c46fd04a8386a6009215b0a9f7";//must be changed in order to function
 const params = new URLSearchParams(window.location.search);
 const code = params.get("code");
 
@@ -26,7 +26,14 @@ if (!code) {
 
     /** fill webpage with data */
     populateUI(topArtists, topTracks, savedTracks);
+    
+    /** downdload button for database stuff **/
+    document.getElementById('downloadButton')!.addEventListener('click', () => {
+        writeToDataFile(topArtists, topTracks, savedTracks);
+    });
 }
+
+
 
 /** TOP ARTISTS */
 async function getTopArtists(code: string): Promise<TopItems> {
@@ -55,6 +62,42 @@ async function getSavedTracks(code: string, limit: number, offset: number): Prom
 
     return await result.json();
 }
+function writeToDataFile(artists: TopItems, tracks: TopItems, saved: SavedTracks) {
+    let data = clientId;
+
+    // Format top artists into a string
+    artists.items.forEach(artist => {
+        data += `${artist.name},`; // Append artist names to the data string
+    });
+
+    data+='\n' + clientId;
+
+    // Format top tracks into a string
+    tracks.items.forEach(track => {
+        data += `${track.name},`; // Append track names to the data string
+    });
+
+    data+='\n' + clientId;
+
+    // Format saved tracks into a string
+    saved.items.forEach(savedTrack => {
+        data += `${savedTrack.track.name},`; // Append saved track names to the data string
+    });
+
+    data+='\n';
+
+    // Create a Blob with the data
+    const blob = new Blob([data], { type: 'text/plain' });
+
+    // Create a link element to trigger the file download
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'spotify_data.txt'; // Set the name of the file to download
+
+    // Programmatically click the link to trigger the download
+    link.click();
+}
+
 
 /** fill webpage w/ info */
 function populateUI(artists: TopItems, tracks: TopItems, saved: SavedTracks) {
@@ -95,3 +138,5 @@ function populateUI(artists: TopItems, tracks: TopItems, saved: SavedTracks) {
     document.getElementById("s20")!.innerText = saved.items[19].track.name;
 
 }
+
+
